@@ -3,11 +3,14 @@
 /*global nextGuess:true*/
 
 //Global possiblities tracker
-var possible;
+var possible
+  , tempKnuth
+  , i;
 
 document.addEventListener('DOMContentLoaded', function() {
-  var i = 0;
   possible = generate();
+  i = 0;
+  tempKnuth = JSON.parse(JSON.stringify(nextGuess));
   document.getElementById('ahem').style.visibility = 'hidden';
   document.getElementById('theTable').addEventListener('click', function(e) {
     if(e.target && e.target.nodeName == 'BUTTON') {
@@ -21,12 +24,14 @@ document.addEventListener('DOMContentLoaded', function() {
       e.preventDefault();
     }
   });
+  document.getElementById('reset').addEventListener('click', reset);
 });
 
 function nextStep(num) {
   var bw = []
     , guessForm = document.getElementById('input' + (num + 1))
-    , objective = document.getElementById('input' + num).value;
+    , objective = document.getElementById('input' + num).value
+    , bwIndex;
   //Get b/w data from form
   bw[0] = parseInt(document.getElementById('black'+num).value, 10);
   bw[1] = parseInt(document.getElementById('white'+num).value, 10);
@@ -34,18 +39,25 @@ function nextStep(num) {
   possible = eliminate(possible, objective, bw);
   //Incredibly original variable names!
   //Find next guess:
-  nextGuess = nextGuess[bw.join(',')];
-  if(nextGuess !== undefined) {
-    //We have another Knuth guess
-    guessForm.value = nextGuess.guess;
-  } else if (possible.length > 0) {
-    //There are two possible senarios here.
-    //If we've found the answer (one possible left) then we return it
-    //If there's two, we give them the first one and either get it right, or 
-    //get it right next time
+  if(bw[0] !== 4 && possible.length > 1) {
+    bwIndex = bw.join(',');
+    if(tempKnuth.hasOwnProperty(bwIndex)) {
+      //Look up next guess
+      tempKnuth = tempKnuth[bwIndex];
+      if(tempKnuth !== undefined) {
+        //We have another Knuth guess
+        guessForm.value = tempKnuth.guess;
+      }
+    } else if (possible.length > 1) {
+      //Knuth has failed us, time to brute force
+      guessForm.value = possible[0];
+    } else {
+      console.log(possible);
+    }
+  } else if (possible.length === 1) {
     guessForm.value = possible[0];
-  } else {
-    guessForm.value = 'Cheater!';
+    guessForm.style['background-color'] = '#00FF00';
+    //console.log(possible[0] + ' found correctly');
   }
 }
 
@@ -67,6 +79,9 @@ function generate() {
 
 /**
  * Removes all elements from possibles that aren't compatible with current state
+ * possibles: An array of four-digit strings containing possible answers at this step
+ * objective: Four-character string to test against
+ * bw: Two item array.  Digit at 0 is # of black pegs, 1 is white pegs
  */
 function eliminate(possibles, objective, bw) {
   var results = [], black = bw[0], white = bw[1], item, tmpblack, tmpwhite, tmpobj;
@@ -74,7 +89,7 @@ function eliminate(possibles, objective, bw) {
     item = possibles[x].split('');
     tmpblack = 0;
     tmpwhite = 0;
-    tmpobj = objective.slice(0);
+    tmpobj = objective.split('');
     //Run through and find all perfect matches
     for(var y in item) {
       if(item[y] === tmpobj[y]) {
@@ -115,4 +130,24 @@ function eliminate(possibles, objective, bw) {
     }
   }
   return results;
+}
+
+/**
+ * Resets to factory defaults
+ */
+function reset() {
+  //Return global variables to start
+  possible = generate();
+  i = 0;
+  tempKnuth = JSON.parse(JSON.stringify(nextGuess));
+  //Zero b/w values
+  for(var j=0;j<5;j++) {
+    document.getElementById('black' + j).value = '0';
+    document.getElementById('white' + j).value = '0';
+  }
+  //Empty guess boxes, i is initially one because the first guess is always 1122
+  for(j=1;j<5;j++) {
+    document.getElementById('input' + j).value = '';
+    document.getElementById('input' + j).style['background-color'] = '';
+  }
 }
