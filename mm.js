@@ -6,27 +6,41 @@
 var possible
   , tempKnuth
   , i;
-
+/**
+ * DOM event manipulation
+ * This triggers when the page finishes loading and initializes some variables
+ * as well as adding event triggers to the "next" buttons
+ */
 document.addEventListener('DOMContentLoaded', function() {
+  //Initialize global variables
+  //We're not calling reset() here because it involves more work
   possible = generate();
   i = 0;
   tempKnuth = JSON.parse(JSON.stringify(nextGuess));
   document.getElementById('ahem').style.visibility = 'hidden';
+  //Event listener for the whole table, only does something when a button's clicked
   document.getElementById('theTable').addEventListener('click', function(e) {
+    //If what was clicked was a button
     if(e.target && e.target.nodeName == 'BUTTON') {
+      //And it's the current button:
+      //TODO: replace this check by disabling all non-active buttons
       if(e.target.id == i) {
         document.getElementById('ahem').style.visibility = 'hidden';
         nextStep(i);
         i++;
+      //Otherwise, correct the user
       } else {
         document.getElementById('ahem').style.visibility = '';
       }
-      e.preventDefault();
     }
   });
+  //Trigger reset when the reset button is clicked
   document.getElementById('reset').addEventListener('click', reset);
 });
 
+/**
+ * Determines the next guess
+ */
 function nextStep(num) {
   var bw = []
     , guessForm = document.getElementById('input' + (num + 1))
@@ -35,7 +49,7 @@ function nextStep(num) {
   //Get b/w data from form
   bw[0] = parseInt(document.getElementById('black'+num).value, 10);
   bw[1] = parseInt(document.getElementById('white'+num).value, 10);
-  //Send data through cruncher
+  //Eliminate all possiblities that aren't consistent with current state
   possible = eliminate(possible, objective, bw);
   //Incredibly original variable names!
   //Find next guess:
