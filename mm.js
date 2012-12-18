@@ -5,19 +5,19 @@
 //Global possiblities tracker
 var possible
   , tempKnuth
-  , i;
+  , currentStep;
 
 document.addEventListener('DOMContentLoaded', function() {
   possible = generate();
-  i = 0;
+  currentStep = 0;
   tempKnuth = JSON.parse(JSON.stringify(nextGuess));
   document.getElementById('ahem').style.visibility = 'hidden';
   document.getElementById('theTable').addEventListener('click', function(e) {
     if(e.target && e.target.nodeName == 'BUTTON') {
-      if(e.target.id == i) {
+      if(e.target.id == currentStep) {
         document.getElementById('ahem').style.visibility = 'hidden';
-        nextStep(i);
-        i++;
+        nextStep(currentStep);
+        currentStep++;
       } else {
         document.getElementById('ahem').style.visibility = '';
       }
@@ -33,8 +33,8 @@ function nextStep(num) {
     , objective = document.getElementById('input' + num).value
     , bwIndex;
   //Get b/w data from form
-  bw[0] = parseInt(document.getElementById('black'+num).value, 10);
-  bw[1] = parseInt(document.getElementById('white'+num).value, 10);
+  bw[0] = parseInt(document.getElementById('black' + num).value, 10);
+  bw[1] = parseInt(document.getElementById('white' + num).value, 10);
   //Send data through cruncher
   possible = eliminate(possible, objective, bw);
   //Incredibly original variable names!
@@ -57,7 +57,6 @@ function nextStep(num) {
   } else if (possible.length === 1) {
     guessForm.value = possible[0];
     guessForm.style['background-color'] = '#00FF00';
-    //console.log(possible[0] + ' found correctly');
   }
 }
 
@@ -116,15 +115,6 @@ function eliminate(possibles, objective, bw) {
         tmpwhite += 1;
       }
     }
-    //Can use one loop, both should be the same length
-    for(y in item) {
-      if(item[y] === undefined) {
-        item.splice(y, 1);
-      }
-      if(tmpobj[y] === undefined) {
-        tmpobj.splice(y, 1);
-      }
-    }
     if(black === tmpblack && white === tmpwhite) {
       results.push(possibles[x]);
     }
@@ -138,16 +128,16 @@ function eliminate(possibles, objective, bw) {
 function reset() {
   //Return global variables to start
   possible = generate();
-  i = 0;
+  currentStep = 0;
   tempKnuth = JSON.parse(JSON.stringify(nextGuess));
   //Zero b/w values
-  for(var j=0;j<5;j++) {
-    document.getElementById('black' + j).value = '0';
-    document.getElementById('white' + j).value = '0';
+  for(var i=0;i<5;i++) {
+    document.getElementById('black' + i).value = '0';
+    document.getElementById('white' + i).value = '0';
   }
   //Empty guess boxes, i is initially one because the first guess is always 1122
-  for(j=1;j<5;j++) {
-    document.getElementById('input' + j).value = '';
-    document.getElementById('input' + j).style['background-color'] = '';
+  for(i=1;i<6;i++) {
+    document.getElementById('input' + i).value = '';
+    document.getElementById('input' + i).style['background-color'] = '';
   }
 }
