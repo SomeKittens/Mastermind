@@ -18,8 +18,8 @@ function generateKnuth(numColors, numSlots, possible) {
   for(var x in possible) {
     guess = possible[x];
     guessResults = [];
-    for(b=0;b<5;b++) {
-      for(w=0;w+b<=4;w++) {
+    for(b=0;b<numSlots;b++) {
+      for(w=0;w+b<numSlots;w++) {
         thisResponse = eliminate(possible, guess, [b,w]);
         if(thisResponse.length <= currentBestMax) {
           guessResults.push(thisResponse.length);
@@ -37,8 +37,8 @@ function generateKnuth(numColors, numSlots, possible) {
   }
   //At this point, we've established the best guess
   currentKnuth.guess = currentBest;
-  for(b=0;b<5;b++) {
-    for(w=0;w+b<=4;w++) {
+  for(b=0;b<numSlots;b++) {
+    for(w=0;w+b<numSlots;w++) {
       nextStep = generateKnuth(numColors, numSlots, eliminate(possible, currentBest, [b,w]));
       if(nextStep === false) {
         continue;
