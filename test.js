@@ -1,9 +1,15 @@
 'use strict';
-/*global nextGuess:false*/
+// mm.js
 /*global generate:false*/
 /*global eliminate:false*/
 /*global reset:false*/
 /*global nextStep:false*/
+
+// knuthLookup.js
+/*global nextGuess:false*/
+// generateKnuth.js
+/*global generateKnuth:false*/
+
 /*global document:false*/
 
 var testRig = (function() {
@@ -49,7 +55,7 @@ var testRig = (function() {
     runKnuthTest: function() {
       var bw = []
         , itersArray = []
-        , toTest = generate(); //generate is in global scope
+        , toTest = generate() //generate is in global scope
         , bwIndex, guess, possible, tempKnuth, item, iters;
       for(var x in toTest) {
         //Bit of optimization so we don't have to run generate() every time
@@ -117,6 +123,52 @@ var testRig = (function() {
               break;
             }
           } else if (possible.length === 1) {
+            break;
+          }
+        }while(bw[0] !== 4);
+        itersArray.push(iters);
+      }
+      this.finished(itersArray);
+    },
+    testAlterKnuth: function() {
+      var bw = []
+        , itersArray = []
+        , toTest = generate() //generate is in global scope
+        , myKnuth = generateKnuth(6, 4, toTest)
+        , bwIndex, guess, possible, tempKnuth, item, iters;
+      console.log('Generating finished, beginning tests');
+      for(var x in toTest) {
+        //Bit of optimization so we don't have to run generate() every time
+        possible = toTest.slice(0);
+        item = toTest[x];
+        guess = '1122';
+        iters = 0;
+        //Deep copy so we can reuse it.
+        tempKnuth = JSON.parse(JSON.stringify(myKnuth));
+        do {
+          iters += 1;
+          //Test against first guess
+          bw = this.check(guess, item);
+          possible = eliminate(possible, guess, bw);
+          if(bw[0] !== 4 && possible.length > 1) {
+            bwIndex = bw.join(',');
+            if(tempKnuth.hasOwnProperty(bwIndex)) {
+              //Look up next guess
+              tempKnuth = tempKnuth[bw.join(',')];
+              if(tempKnuth !== undefined) {
+                //We have another Knuth guess
+                guess = tempKnuth.guess;
+              }
+            } else if (possible.length > 1) {
+              //Knuth has failed us, time to brute force
+              guess = possible[0];
+            } else {
+              console.error('Error when testing ' + item);
+              console.log(possible);
+              break;
+            }
+          } else if (possible.length === 1) {
+            //console.log(item + ' found correctly');
             break;
           }
         }while(bw[0] !== 4);
